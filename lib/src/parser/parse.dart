@@ -33,8 +33,7 @@ class Parser {
       _damagedExcel();
     }
     file!.decompress();
-    _excel._xmlFiles["[Content_Types].xml"] =
-        XmlDocument.parse(utf8.decode(file.content));
+    _excel._xmlFiles["[Content_Types].xml"] = XmlDocument.parse(utf8.decode(file.content));
   }
 
   _parseRelations() {
@@ -70,8 +69,7 @@ class Parser {
   }
 
   _parseSharedStrings() {
-    var sharedStrings =
-        _excel._archive.findFile('xl/${_excel._sharedStringsTarget}');
+    var sharedStrings = _excel._archive.findFile('xl/${_excel._sharedStringsTarget}');
     if (sharedStrings == null) {
       _excel._sharedStringsTarget = 'sharedStrings.xml';
 
@@ -102,9 +100,7 @@ class Parser {
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml";
         bool contain = true;
 
-        _excel._xmlFiles["[Content_Types].xml"]
-            ?.findAllElements('Override')
-            .forEach((node) {
+        _excel._xmlFiles["[Content_Types].xml"]?.findAllElements('Override').forEach((node) {
           var value = node.getAttribute('ContentType');
           if (value == content) {
             contain = false;
@@ -127,10 +123,9 @@ class Parser {
 
       var content = utf8.encode(
           "<sst xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" count=\"0\" uniqueCount=\"0\"/>");
-      _excel._archive.addFile(ArchiveFile(
-          'xl/${_excel._sharedStringsTarget}', content.length, content));
-      sharedStrings =
-          _excel._archive.findFile('xl/${_excel._sharedStringsTarget}');
+      _excel._archive
+          .addFile(ArchiveFile('xl/${_excel._sharedStringsTarget}', content.length, content));
+      sharedStrings = _excel._archive.findFile('xl/${_excel._sharedStringsTarget}');
     }
     sharedStrings!.decompress();
     var document = XmlDocument.parse(utf8.decode(sharedStrings.content));
@@ -491,8 +486,7 @@ class Parser {
     switch (type) {
       // sharedString
       case 's':
-        value = _excel._sharedStrings
-            .value(int.parse(_parseValue(node.findElements('v').first)));
+        value = _excel._sharedStrings.value(int.parse(_parseValue(node.findElements('v').first)));
         break;
       // boolean
       case 'b':
@@ -522,18 +516,7 @@ class Parser {
         } else {
           if (s1 != null) {
             var fmtId = _excel._numFormats[s];
-            // date
-            if (((fmtId >= 14) && (fmtId <= 17)) ||
-                (fmtId == 22) ||
-                (fmtId == 164)) {
-              var delta = num.parse(_parseValue(content)) * 24 * 3600 * 1000;
-              var date = DateTime(1899, 12, 30);
-              value = date
-                  .add(Duration(milliseconds: delta.toInt()))
-                  .toIso8601String();
-              // time
-            } else if (((fmtId >= 18) && (fmtId <= 21)) ||
-                ((fmtId >= 45) && (fmtId <= 47))) {
+            if (((fmtId >= 18) && (fmtId <= 21)) || ((fmtId >= 45) && (fmtId <= 47))) {
               var delta = num.parse(_parseValue(content)) * 24 * 3600 * 1000;
               var date = DateTime(0);
               date = date.add(Duration(milliseconds: delta.toInt()));
@@ -549,8 +532,7 @@ class Parser {
         }
     }
     sheetObject.updateCell(
-        CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex),
-        value,
+        CellIndex.indexByColumnRow(columnIndex: colIndex, rowIndex: rowIndex), value,
         cellStyle: _excel._cellStyleList[s]);
     if (value.runtimeType == String) {
       _excel._sharedStrings.add(value);
@@ -599,9 +581,7 @@ class Parser {
     int _sheetId = -1;
     List<int> sheetIdList = <int>[];
 
-    _excel._xmlFiles['xl/workbook.xml']
-        ?.findAllElements('sheet')
-        .forEach((sheetIdNode) {
+    _excel._xmlFiles['xl/workbook.xml']?.findAllElements('sheet').forEach((sheetIdNode) {
       var sheetId = sheetIdNode.getAttribute('sheetId');
       if (sheetId != null) {
         int t = int.parse(sheetId.toString());
@@ -646,11 +626,7 @@ class Parser {
       _rId.add('rId$ridNumber');
     }
 
-    _excel._xmlFiles['xl/workbook.xml']
-        ?.findAllElements('sheets')
-        .first
-        .children
-        .add(XmlElement(
+    _excel._xmlFiles['xl/workbook.xml']?.findAllElements('sheets').first.children.add(XmlElement(
           XmlName('sheet'),
           <XmlAttribute>[
             XmlAttribute(XmlName('state'), 'visible'),
@@ -665,32 +641,25 @@ class Parser {
     var content = utf8.encode(
         "<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"x14ac xr xr2 xr3\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\" xmlns:xr=\"http://schemas.microsoft.com/office/spreadsheetml/2014/revision\" xmlns:xr2=\"http://schemas.microsoft.com/office/spreadsheetml/2015/revision2\" xmlns:xr3=\"http://schemas.microsoft.com/office/spreadsheetml/2016/revision3\"> <dimension ref=\"A1\"/> <sheetViews> <sheetView workbookViewId=\"0\"/> </sheetViews> <sheetData/> <pageMargins left=\"0.7\" right=\"0.7\" top=\"0.75\" bottom=\"0.75\" header=\"0.3\" footer=\"0.3\"/> </worksheet>");
 
-    _excel._archive.addFile(ArchiveFile(
-        'xl/worksheets/sheet${sheetNumber}.xml', content.length, content));
-    var _newSheet =
-        _excel._archive.findFile('xl/worksheets/sheet${sheetNumber}.xml');
+    _excel._archive
+        .addFile(ArchiveFile('xl/worksheets/sheet${sheetNumber}.xml', content.length, content));
+    var _newSheet = _excel._archive.findFile('xl/worksheets/sheet${sheetNumber}.xml');
 
     _newSheet!.decompress();
     var document = XmlDocument.parse(utf8.decode(_newSheet.content));
     _excel._xmlFiles['xl/worksheets/sheet${sheetNumber}.xml'] = document;
     _excel._xmlSheetId[newSheet] = 'xl/worksheets/sheet${sheetNumber}.xml';
 
-    _excel._xmlFiles['[Content_Types].xml']
-        ?.findAllElements('Types')
-        .first
-        .children
-        .add(XmlElement(
+    _excel._xmlFiles['[Content_Types].xml']?.findAllElements('Types').first.children.add(XmlElement(
           XmlName('Override'),
           <XmlAttribute>[
             XmlAttribute(XmlName('ContentType'),
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml'),
-            XmlAttribute(
-                XmlName('PartName'), '/xl/worksheets/sheet${sheetNumber}.xml'),
+            XmlAttribute(XmlName('PartName'), '/xl/worksheets/sheet${sheetNumber}.xml'),
           ],
         ));
     if (_excel._xmlFiles['xl/workbook.xml'] != null)
-      _parseTable(
-          _excel._xmlFiles['xl/workbook.xml']!.findAllElements('sheet').last);
+      _parseTable(_excel._xmlFiles['xl/workbook.xml']!.findAllElements('sheet').last);
   }
 
   void _parseHeaderFooter(XmlElement worksheet, Sheet sheetObject) {
